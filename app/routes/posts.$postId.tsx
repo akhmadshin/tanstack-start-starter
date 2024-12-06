@@ -1,9 +1,8 @@
 import { ErrorComponent, Link, createFileRoute } from '@tanstack/react-router'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { postQueryOptions } from '../utils/posts'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { NotFound } from '~/components/NotFound'
-import { Page } from '~/components/Page';
 import React from 'react';
 
 const NotFoundRouteComponent = () => <NotFound>Post not found</NotFound>
@@ -48,7 +47,7 @@ function PostComponent() {
     return <ErrorComponent error={error} />
   }
 
-  if (!data || isLoading || isFetching) {
+  if (!data) {
     // Suspense loader
     return (
       <div>Loading...</div>
