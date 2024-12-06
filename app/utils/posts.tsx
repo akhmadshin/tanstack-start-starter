@@ -9,12 +9,14 @@ export type PostType = {
   body: string
 }
 
-export const fetchPosts = createServerFn('GET', async () => {
-  console.info('Fetching posts...')
-  return axios
-    .get<Array<PostType>>('https://jsonplaceholder.typicode.com/posts')
-    .then((r) => r.data.slice(0, 10))
-})
+export const fetchPosts = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    console.info('Fetching posts...')
+    return axios
+      .get<Array<PostType>>('https://jsonplaceholder.typicode.com/posts')
+      .then((r) => r.data.slice(0, 10))
+  },
+)
 
 export const postsQueryOptions = () =>
   queryOptions({
@@ -22,24 +24,40 @@ export const postsQueryOptions = () =>
     queryFn: () => fetchPosts(),
   })
 
-export const fetchPost = createServerFn('GET', async (postId: string) => {
-  console.info(`Fetching post with id ${postId}...`)
+export const fetchPostClient = async ({ data }: { data: string }) => {
   const post = await axios
-    .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${postId}`)
+    .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${data}`)
     .then((r) => r.data)
     .catch((err) => {
-      console.error(err)
-      if (err.status === 404) {
-        throw notFound()
-      }
-      throw err
+      console.log('err = ', err);
+      return Promise.reject(new Error(err))
     })
 
   return post
-})
+}
+export const fetchPost = createServerFn({ method: 'GET' })
+  .validator((d: string) => d)
+  .handler(async ({ data }) => {
+    console.info(`Fetching post with id ${data}...`)
+    const post = await axios
+      .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${data}`)
+      .then((r) => r.data)
+      .catch((err) => {
+        console.error(err)
+        if (err.status === 404) {
+          throw notFound()
+        }
+        throw err
+      })
 
-export const postQueryOptions = (postId: string) =>
+    return post
+  })
+
+export const postQueryOptions = (postId: string, placeholderData?: any) =>
   queryOptions({
     queryKey: ['post', postId],
-    queryFn: () => fetchPost(postId),
+    retry: 0,
+    staleTime: Infinity,
+    queryFn: () => fetchPost({ data: postId }),
+    placeholderData,
   })

@@ -1,12 +1,15 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { postsQueryOptions } from '../utils/posts'
+import { Link } from '~/components/Link';
 
 export const Route = createFileRoute('/posts')({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(postsQueryOptions())
   },
-  meta: () => [{ title: 'Posts' }],
+  head: () => ({
+    meta: [{ title: 'Posts' }],
+  }),
   component: PostsComponent,
 })
 
@@ -24,9 +27,11 @@ function PostsComponent() {
             <li key={post.id} className="whitespace-nowrap">
               <Link
                 to="/posts/$postId"
+                preload={false}
                 params={{
                   postId: post.id,
                 }}
+                placeholderData={(post as any).body ? post : undefined}
                 className="block py-1 text-blue-800 hover:text-blue-600"
                 activeProps={{ className: 'text-black font-bold' }}
               >
