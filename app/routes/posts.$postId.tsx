@@ -8,7 +8,6 @@ import React from 'react';
 const NotFoundRouteComponent = () => <NotFound>Post not found</NotFound>
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({ params: { postId }, context, cause }) => {
-    console.info('cause = ', cause);
     if (cause === 'stay') {
       return;
     }
@@ -36,7 +35,7 @@ export function PostErrorComponent({ error }: ErrorComponentProps) {
 function PostComponent() {
   const { postId } = Route.useParams()
   const queryData = useQuery(postQueryOptions(postId, typeof window !== 'undefined' ? window.placeholderData : undefined))
-  const { data, isLoading, isFetching, isError, error } = queryData;
+  const { data, error } = queryData;
 
   if ((error as unknown as { isNotFound: boolean })?.isNotFound) {
     return (
@@ -69,6 +68,5 @@ function PostComponent() {
         Deep View
       </Link>
     </div>
-
   )
 }
