@@ -24,17 +24,6 @@ export const postsQueryOptions = () =>
     queryFn: () => fetchPosts(),
   })
 
-export const fetchPostClient = async ({ data }: { data: string }) => {
-  const post = await axios
-    .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${data}`)
-    .then((r) => r.data)
-    .catch((err) => {
-      console.log('err = ', err);
-      return Promise.reject(new Error(err))
-    })
-
-  return post
-}
 export const fetchPost = createServerFn({ method: 'GET' })
   .validator((d: string) => d)
   .handler(async ({ data }) => {
